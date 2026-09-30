@@ -2,8 +2,8 @@ import { Loader2 } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
+import Header from './assets/layout/Header';
+import Footer from './assets/layout/Footer';
 
 const Home = lazy( () => import( './pages/Home' ) );
 const NotFound = lazy( () => import( './pages/NotFound' ) );

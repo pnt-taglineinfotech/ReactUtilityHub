@@ -1,7 +1,7 @@
 import { ArrowLeft, Copy, CopyCheck } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "../components/DialogComponent/PopUps";
+import { Alert } from "../assets/components/PopUps";
 
 export default function PasswordGenerator() {
 

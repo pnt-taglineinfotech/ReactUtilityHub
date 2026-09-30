@@ -1,7 +1,7 @@
 import { Form, Formik } from "formik";
 import { ArrowLeft, ChevronUp, Delete, Divide, Dot, Minus, Plus, Radical, X } from "lucide-react";
 import { useState } from "react";
-import { Alert } from "../components/DialogComponent/PopUps";
+import { Alert } from "../assets/components/PopUps";
 import { useNavigate } from "react-router-dom";
 
 export default function Calculator() {
