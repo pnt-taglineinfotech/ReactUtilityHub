@@ -52,7 +52,9 @@ export default function Stopwatch() {
 
 			<p className="text-3xl text-center font-semibold">Stopwatch</p>
 
-			<span className="text-7xl text-center content-center">{ `${ stopwatch.hours }`.padStart( 2, '0' ) }:{ `${ stopwatch.minutes }`.padStart( 2, '0' ) }:{ `${ stopwatch.seconds }`.padStart( 2, '0' ) }:{ `${ stopwatch.milliseconds }`.padStart( 3, '0' ) }</span>
+			<span className="text-7xl text-center content-center">
+				{ `${ stopwatch.hours }`.padStart( 2, '0' ) }:{ `${ stopwatch.minutes }`.padStart( 2, '0' ) }:{ `${ stopwatch.seconds }`.padStart( 2, '0' ) }:{ `${ stopwatch.milliseconds }`.padStart( 3, '0' ) }
+			</span>
 
 			<section className="flex justify-around items-center">
 
@@ -112,12 +114,12 @@ export default function Stopwatch() {
 
 				<section className="mt-5 flex flex-col-reverse gap-5">
 
-					{ flag.map( ( f, idx ) => <span key={ `flag-${ idx + 1 }` } className="flex gap-2">
+					{ flag.map( ( f, idx ) => <section key={ `flag-${ idx + 1 }` } className="flex gap-2">
 
 						<span className="w-1/6">#{ idx + 1 }</span>
 						<span className="grow">{ `${ f.hours }`.padStart( 2, '0' ) }:{ `${ f.minutes }`.padStart( 2, '0' ) }:{ `${ f.seconds }`.padStart( 2, '0' ) }:{ `${ f.milliseconds }`.padStart( 3, '0' ) }</span>
 
-					</span> ) }
+					</section> ) }
 
 				</section>
 

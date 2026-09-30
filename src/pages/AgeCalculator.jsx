@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function AgeCalculator() {
 
@@ -25,7 +25,9 @@ export default function AgeCalculator() {
 			type="button"
 			className="p-2 ms-50 bg-slate-600 hover:bg-slate-700 border border-slate-300 hover:border-slate-400 rounded-xl cursor-pointer"
 			onClick={ () => navigate( '/', { replace: true } ) }
-		> <ArrowLeft size={ 20 } color="white" /></button>
+		>
+			<ArrowLeft size={ 20 } color="white" />
+		</button>
 
 		<section className="w-3/7 mx-auto p-5 flex flex-col gap-5">
 

@@ -57,7 +57,7 @@ export default function MovieSearch() {
 
 				<label htmlFor="input-search" className="text-xs select-none">Movie Name</label>
 
-				<section className="flex flex-row gap-5 items-center select-none">
+				<section className="flex gap-5 items-center select-none">
 
 					<input
 						id="input-search"
@@ -271,10 +271,10 @@ function Dialog( { tt, onDismiss } ) {
 				<Image src={ result.Poster } />
 			</section>
 
-			<section className="col-span-full flex flex-row items-center gap-5">
+			<section className="col-span-full flex items-center gap-5">
 
-				<section className="flex flex-row justify-center items-center gap-2"><Star size={ 20 } color="#99a1af"/> { result.imdbRating }</section>
-				<section className="flex flex-row justify-center items-center gap-2"><Vote size={ 20 } color="#99a1af"/> { result.imdbVotes }</section>
+				<section className="flex justify-center items-center gap-2"><Star size={ 20 } color="#99a1af"/> { result.imdbRating }</section>
+				<section className="flex justify-center items-center gap-2"><Vote size={ 20 } color="#99a1af"/> { result.imdbVotes }</section>
 
 			</section>
 

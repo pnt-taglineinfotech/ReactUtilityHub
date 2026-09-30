@@ -161,8 +161,7 @@ export default function CurrencyConverter() {
 
 							if ( value === NaN )
 								return;
-
-							if ( value <= 0 )
+							else if ( value <= 0 )
 								setConvert( c => ( { ...c, amount: 0, value: 0 } ) );
 							else
 								setConvert( c => ( { ...c, amount: value } ) );

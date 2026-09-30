@@ -6,7 +6,7 @@ export default function Home() {
 
 	return <main className="min-h-[88vh] pt-10">
 
-		<section className="mx-auto w-4/5 border p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+		<section className="mx-auto w-4/5 p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
 
 			{ utilities.map( ( utility, idx ) => <Link
 				key={ `utility-${ idx + 1 }` }

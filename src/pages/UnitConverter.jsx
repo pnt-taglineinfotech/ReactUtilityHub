@@ -1,44 +1,11 @@
 import { ArrowDownUpIcon, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { units } from "../assets/js/common";
 
 export default function UnitConverter() {
 
-	const units = {
-		Length: {
-			Millimeter: 1,
-			Centimeter: 10,
-			Meter: 1000,
-			Kilometer: 1000000,
-			Mile: 1609344,
-			Foot: 304.8,
-			Inch: 25.4
-		},
-		Weight: {
-			Gram: 1,
-			Kilogram: 1000,
-			Pound: 453.59237,
-			Ounce: 28.349523125
-		},
-		Temperature: {
-			Celsius: 1,
-			Fahrenheit: 33.8,
-			Kelvin: 274.15
-		},
-		Time: {
-			Seconds: 1,
-			Minutes: 60,
-			Hours: 3600,
-			Days: 86400
-		}
-	};
-
-	const [ convert, setConvert ] = useState( {
-		measure: '',
-		value: '',
-		from: '',
-		to: ''
-	} );
+	const [ convert, setConvert ] = useState( { measure: '', value: '', from: '', to: '' } );
 
 	function convertUnit( value, measure, from, to ) {
 
@@ -91,25 +58,16 @@ export default function UnitConverter() {
 			<button
 				type="button"
 				className="p-2 w-1/5 self-end bg-green-700 hover:bg-green-800 border border-green-300 hover:border-green-400 rounded-xl text-white cursor-pointer"
-				onClick={ () => setConvert( {
-					measure: '',
-					value: '',
-					from: '',
-					to: ''
-				} ) }
+				onClick={ () => setConvert( { measure: '', value: '', from: '', to: '' } ) }
 			>Clear</button>
 
 			<section className="w-full p-5 border border-gray-300 rounded-xl flex flex-col">
 
-				<label htmlFor="dateOfBirth" className="text-xs">Measurement</label>
+				<label htmlFor="select-measure" className="text-xs">Measurement</label>
 				<select
+					id="select-measure"
 					value={ convert.measure }
-					onChange={ e => setConvert( {
-						measure: e.target.value,
-						value: '',
-						from: '',
-						to: ''
-					} ) }
+					onChange={ e => setConvert( { measure: e.target.value, value: '', from: '', to: '' } ) }
 				>
 
 					<option value="" disabled hidden>Select Measures</option>
@@ -121,7 +79,7 @@ export default function UnitConverter() {
 
 			<section className="w-full p-5 border border-gray-300 rounded-xl flex flex-col">
 
-				<label htmlFor="" className="text-xs">From</label>
+				<label className="text-xs">From</label>
 				<section className="flex gap-5">
 
 					<select
@@ -147,18 +105,18 @@ export default function UnitConverter() {
 
 			</section>
 
-				<button
-					type="button"
-					className="w-fit p-2 self-center rounded-full not-disabled:hover:bg-blue-100 group cursor-pointer disabled:cursor-not-allowed"
-					disabled={ !convert?.measure && !convert?.to && !convert?.from }
-					onClick={ () => setConvert( c => ( { ...c, from: c.to, to: c.from } ) ) }
-				>
-					<ArrowDownUpIcon size={ 20 } className="group-not-disabled:group-hover:stroke-blue-600" />
-				</button>
+			<button
+				type="button"
+				className="w-fit p-2 self-center rounded-full not-disabled:hover:bg-blue-100 group cursor-pointer disabled:cursor-not-allowed"
+				disabled={ !convert?.measure && !convert?.to && !convert?.from }
+				onClick={ () => setConvert( c => ( { ...c, from: c.to, to: c.from } ) ) }
+			>
+				<ArrowDownUpIcon size={ 20 } className="group-not-disabled:group-hover:stroke-blue-600" />
+			</button>
 
-			<section className="w-full p-5 border border-gray-300 rounded-xl flex flex-col">
+			<section className="p-5 border border-gray-300 rounded-xl flex flex-col">
 
-				<label htmlFor="" className="text-xs">To</label>
+				<label className="text-xs">To</label>
 				<section className="flex gap-5">
 
 					<select
@@ -172,7 +130,9 @@ export default function UnitConverter() {
 						{ !!convert?.measure && Object.keys( units?.[ convert.measure ] ).map( ( unit, idx ) => <option key={ `unit-to-select-option-${ idx + 1 }` } value={ unit }>{ unit }</option> ) }
 
 					</select>
-					<span className="grow text-lg text-end border-b border-gray-400">{ ( !!convert?.measure && !!convert?.to && !!convert?.from && !!convert?.value ) ? convertUnit( convert.value, convert.measure, convert.from, convert.to ) : '' }</span>
+					<span className="grow text-lg text-end border-b border-gray-400">
+						{ ( !!convert?.measure && !!convert?.to && !!convert?.from && !!convert?.value ) ? convertUnit( convert.value, convert.measure, convert.from, convert.to ) : '' }
+					</span>
 
 				</section>
 

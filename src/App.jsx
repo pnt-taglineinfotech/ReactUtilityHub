@@ -2,9 +2,10 @@ import { Loader2 } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+
 const Home = lazy( () => import( './pages/Home' ) );
-const Header = lazy( () => import( './components/layout/Header' ) );
-const Footer = lazy( () => import( './components/layout/Footer' ) );
 const NotFound = lazy( () => import( './pages/NotFound' ) );
 const Calculator = lazy( () => import( './pages/Calculator' ) );
 const AgeCalculator = lazy( () => import( './pages/AgeCalculator' ) );
@@ -15,6 +16,8 @@ const Stopwatch = lazy( () => import( './pages/Stopwatch' ) );
 const Timer = lazy( () => import( './pages/Timer' ) );
 const DiceRoller = lazy( () => import( './pages/DiceRoller' ) );
 const MovieSearch = lazy( () => import( './pages/MovieSearch' ) );
+const PasswordGenerator = lazy( () => import( './pages/PasswordGenerator' ) );
+const URLParser = lazy( () => import( './pages/URLParser' ) );
 
 export default function App() {
 
@@ -38,6 +41,8 @@ export default function App() {
 				<Route path="/timer" element={ <Timer /> } />
 				<Route path="/dice-roller" element={ <DiceRoller /> } />
 				<Route path="/movie-search" element={ <MovieSearch /> } />
+				<Route path="/password-generator" element={ <PasswordGenerator /> } />
+				<Route path="/url-parser" element={ <URLParser /> } />
 				<Route path="*" element={ <NotFound /> } />
 
 			</Routes>

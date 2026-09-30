@@ -72,8 +72,7 @@ export default function WeatherForcast() {
 									throw new Error( 'City not found!' );
 								}
 
-								const { weather, main, wind, name } = await response.json();
-								const { main: condition, icon } = weather[ 0 ];
+								const { weather: [ { main: condition, icon }, ..._ ] = [], main, wind, name } = await response.json();
 								setWeatherData( { main, wind, name, condition, icon } );
 
 							} catch ( error ) {
