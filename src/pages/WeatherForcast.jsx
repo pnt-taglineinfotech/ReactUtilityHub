@@ -66,7 +66,7 @@ export default function WeatherForcast() {
 								setWeatherLoading( true );
 								setError( null );
 
-								const response = await fetch( `http://api.openweathermap.org/data/2.5/weather?appid=${ import.meta.env.VITE_WEATHER_API_KEY }&units=metric&q=${ city }` );
+								const response = await fetch( `https://api.openweathermap.org/data/2.5/weather?appid=${ import.meta.env.VITE_WEATHER_API_KEY }&units=metric&q=${ city }` );
 								
 								if ( !response.ok ) {
 									throw new Error( 'City not found!' );
