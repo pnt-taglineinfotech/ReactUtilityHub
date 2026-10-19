@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Search } from "lucide-react";
+import { ArrowLeft, Loader2, Search, RefreshCw, CloudSun, Droplets, Wind, Thermometer, AlertCircle } from "lucide-react";
 
 export default function WeatherForcast() {
 
@@ -11,54 +11,43 @@ export default function WeatherForcast() {
 	const [ weatherData, setWeatherData ] = useState( null );
 	const [ error, setError ] = useState( null );
 
-	return <main className="min-h-[88vh] pt-10">
+	return <main className="min-h-[86.1vh] bg-gray-50 text-gray-800 font-sans py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+			
+		<div className="w-full max-w-2xl">
 
-		<button
-			type="button"
-			className="p-2 ms-50 bg-slate-600 hover:bg-slate-700 border border-slate-300 hover:border-slate-400 rounded-xl cursor-pointer"
-			onClick={ () => navigate( '/', { replace: true } ) }
-		>
-			<ArrowLeft size={ 20 } color="white" />
-		</button>
+			<div className="flex items-center justify-between mb-8">
 
-		<section className="w-3/7 mx-auto p-5 flex flex-col gap-5">
+				<button
+					type="button"
+					className="p-2 bg-white hover:bg-gray-100 shadow-sm border border-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500"
+					onClick={ () => navigate( '/', { replace: true } ) }
+					aria-label="Go back"
+				>
+					<ArrowLeft size={ 20 } className="stroke-gray-600" />
+				</button>
 
-			<p className="text-3xl text-center font-semibold">Weather Forecast</p>
+				<h1 className="flex items-center gap-2">
 
-			<button
-				type="button"
-				className="p-2 w-1/5 self-end bg-green-700 hover:bg-green-800 border border-green-300 hover:border-green-400 rounded-xl text-white cursor-pointer"
-				onClick={ () => {
+					<CloudSun size={ 26 } className="stroke-sky-500" />
+					<span className="text-2xl font-bold text-gray-900 tracking-tight">Weather Forecast</span>
 
-					setWeatherLoading( false );
-					setCity( '' );
-					setWeatherData( null );
-					setError( null );
+				</h1>
 
-				} }
-			>Clear</button>
+				<div className="w-9" />
 
-			<section className="p-5 border border-gray-300 rounded-xl flex flex-col">
+			</div>
 
-				<label htmlFor="search-city" className="text-xs">City</label>
-				<section className="flex gap-2">
+			<div className="bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-100">
 
-					<input
-						type="text"
-						id="search-city"
-						placeholder="Search City"
-						className="grow py-2 outline-none border-b border-gray-400 focus:border-b-2"
-						value={ city }
-						onChange={ e => setCity( e.target.value ) }
-					/>
+				<div className="p-6 sm:p-8 bg-sky-50/50 border-b border-gray-100">
 
-					<button
-						type="button"
-						className="size-10 bg-gray-400 disabled:bg-gray-300 not-disabled:hover:bg-gray-500 border border-gray-400 disabled:border-gray-300 rounded-lg cursor-pointer disabled:cursor-not-allowed"
-						disabled={ weatherLoading || !city }
-						onClick={ async () => {
+					<form
+						onSubmit={ async e => {
 
-							if ( !city )
+							if ( e )
+								e.preventDefault();
+
+							if ( !city.trim() )
 								return;
 
 							try {
@@ -66,18 +55,21 @@ export default function WeatherForcast() {
 								setWeatherLoading( true );
 								setError( null );
 
-								const response = await fetch( `https://api.openweathermap.org/data/2.5/weather?appid=${ import.meta.env.VITE_WEATHER_API_KEY }&units=metric&q=${ city }` );
-								
-								if ( !response.ok ) {
-									throw new Error( 'City not found!' );
-								}
+								const res = await fetch( `https://api.openweathermap.org/data/2.5/weather?appid=${ import.meta.env.VITE_WEATHER_API_KEY }&units=metric&q=${ city.trim() }`, {
+										method: 'GET',
+										cache: 'no-store'
+									}
+								);
 
-								const { weather: [ { main: condition, icon }, ..._ ] = [], main, wind, name } = await response.json();
+								if ( !res.ok )
+									throw new Error( 'City not found. Please try another location.' );
+
+								const { weather: [ { main: condition, icon } ] = [], main, wind, name } = await res.json();
 								setWeatherData( { main, wind, name, condition, icon } );
 
-							} catch ( error ) {
+							} catch ( err ) {
 
-								setError( error.message );
+								setError( err.message );
 								setWeatherData( null );
 
 							} finally {
@@ -85,58 +77,174 @@ export default function WeatherForcast() {
 							}
 
 						} }
+						className="flex flex-col sm:flex-row gap-3"
 					>
-						<Search size={ 20 } color="white" className="m-auto" />
-					</button>
 
-				</section>
+						<div className="relative grow">
 
-			</section>
+							<Search size={ 18 } className="absolute left-3.5 top-1/2 -translate-y-1/2 stroke-gray-400" />
+							<input
+								type="text"
+								id="search-city"
+								placeholder="Search city (e.g. London, Tokyo)..."
+								className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl font-medium text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-sky-500 transition-all placeholder-gray-400"
+								value={ city }
+								onChange={ e => setCity( e.target.value ) }
+							/>
 
-			{ weatherLoading && <section className="h-85.5 p-5 border border-gray-300 rounded-xl flex justify-center items-center">
-				<Loader2 size={ 40 } color="#6a7282" className="animate-spin" />
-			</section> }
+						</div>
 
-			{ ( !weatherLoading && !!weatherData ) && <section className="p-5 bg-blue-200 border border-gray-300 rounded-xl flex flex-col" >
+						<div className="flex gap-2">
 
-				<span className="text-3xl text-center">{ weatherData.name }</span>
-				<span className="p-5 text-8xl text-center content-center font-extralight" title="Temperature">{ `${ Math.round( weatherData.main.temp ) }°` }</span>
-				<section className="flex justify-center items-center gap-2" title="Weather Condition">
-					<img src={ `https://openweathermap.org/img/wn/${ weatherData.icon }@2x.png` } className="size-20 rounded-full" /> <span className="font-bold content-center">{ weatherData.condition }</span>
-				</section>
+							<button
+								type="submit"
+								className="grow sm:grow-0 px-6 py-3 bg-sky-600 hover:bg-sky-700 rounded-xl shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+								disabled={ weatherLoading || !city.trim() }
+							>
 
-				<section className="mt-5 grid grid-cols-3 gap-5" >
+								{ weatherLoading ?
+									<Loader2 size={ 18 } className="stroke-white animate-spin" />
+								:
+									<span className="text-white font-medium">Search</span>
+								}
 
-					<section className="h-30 p-5 bg-white border border-gray-300 rounded-xl flex flex-col" title="Feels-like Temperature">
+							</button>
 
-						<label className="text-xs truncate">Feels-like Temperature</label>
-						<span className="grow text-3xl text-center content-center">{ `${ Math.round( weatherData.main.feels_like ) }°` }</span>
+							<button
+								type="button"
+								className="p-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+								onClick={ () => {
 
-					</section>
+									setWeatherLoading( false );
+									setCity( '' );
+									setWeatherData( null );
+									setError( null );
 
-					<section className="h-30 p-5 bg-white border border-gray-300 rounded-xl flex flex-col" title="Humidity">
+								} }
+								aria-label="Reset search"
+								title="Clear"
+							>
+								<RefreshCw size={ 18 } className="stroke-gray-600" />
+							</button>
 
-						<label className="text-xs truncate">Humidity</label>
-						<span className="grow text-3xl text-center content-center">{ `${ weatherData.main.humidity }%` }</span>
+						</div>
 
-					</section>
+					</form>
 
-					<section className="h-30 p-5 bg-white border border-gray-300 rounded-xl flex flex-col" title="Wind Speed (km/h)">
+				</div>
 
-						<label className="text-xs truncate">Wind Speed (km/h)</label>
-						<span className="grow text-3xl text-center content-center">{ weatherData.wind.speed }</span>
+				<div className="p-6 sm:p-8 min-h-75 flex flex-col justify-center">
 
-					</section>
+					{ ( !weatherLoading && !weatherData && !error ) && <div className="py-10 flex flex-col items-center gap-3">
 
-				</section>
+						<CloudSun size={ 48 } className="stroke-1 stroke-sky-200" />
+						<p className="text-base text-gray-400 text-center font-medium">Enter a city name above to check the current weather forecast.</p>
 
-			</section> }
+					</div> }
 
-			{ ( !weatherLoading && !!error ) && <section className="h-85.5 p-5 border border-gray-300 rounded-xl flex justify-center items-center" >
-				<span className="text-gray-500">{ error }</span>
-			</section> }
+					{ weatherLoading && <div className="py-12 flex flex-col justify-center items-center gap-3">
 
-		</section>
+						<Loader2 size={ 44 } className="stroke-sky-600 animate-spin" />
+						<p className="text-sm font-medium text-gray-500">Fetching latest weather data...</p>
+
+					</div> }
+
+					{ ( !weatherLoading && !!weatherData ) && <div className="flex flex-col gap-6">
+
+						<div className="bg-linear-to-br from-sky-500 to-blue-600 rounded-2xl p-6 sm:p-8 text-white shadow-lg shadow-sky-500/20 text-center relative overflow-hidden">
+
+							<div className="relative z-10">
+
+								<h2 className="text-2xl sm:text-3xl font-bold tracking-wide">{ weatherData.name }</h2>
+
+								<div className="my-2 flex items-center justify-center gap-2">
+
+									<span className="text-6xl sm:text-7xl font-extrabold tracking-tighter">{ Math.round( weatherData.main.temp ) }°</span>
+
+								</div>
+
+								<div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-medium border border-white/20">
+
+									<img 
+										src={ `https://openweathermap.org/img/wn/${ weatherData.icon }.png ` } 
+										alt={ weatherData.condition } 
+										className="size-8 -my-2"
+									/>
+									<span className="capitalize">{ weatherData.condition }</span>
+
+								</div>
+
+							</div>
+
+						</div>
+
+						<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+							<div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex flex-col items-center text-center">
+
+								<div className="flex items-center gap-1.5 mb-2">
+
+									<Thermometer size={ 16 } className="stroke-amber-500" />
+									<span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Feels Like</span>
+
+								</div>
+
+								<span className="text-2xl font-bold text-gray-800">{ Math.round( weatherData.main.feels_like ) }°</span>
+
+							</div>
+
+							<div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex flex-col items-center text-center">
+
+								<div className="flex items-center gap-1.5 mb-2">
+
+									<Droplets size={ 16 } className="stroke-blue-500" />
+									<span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Humidity</span>
+
+								</div>
+
+								<div>
+
+									<span className="text-2xl font-bold text-gray-800">{ weatherData.main.humidity }</span>
+									<span className="text-xs font-normal text-gray-500">%</span>
+
+								</div>
+
+							</div>
+
+							<div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex flex-col items-center text-center">
+
+								<div className="flex items-center gap-1.5 mb-2">
+
+									<Wind size={ 16 } className="stroke-teal-500" />
+									<span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Wind Speed</span>
+
+								</div>
+
+								<div>
+
+									<span className="text-2xl font-bold text-gray-800">{ weatherData.wind.speed }</span>
+									<span className="text-xs font-normal text-gray-500">km/h</span>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div> }
+
+					{ ( !weatherLoading && !!error ) && <div className="p-6 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center gap-3">
+
+						<AlertCircle size={ 20 } className="shrink-0 stroke-red-600" />
+						<p className="text-sm font-medium text-red-600">{ error }</p>
+
+					</div> }
+
+				</div>
+
+			</div>
+
+		</div>
 
 	</main>;
 

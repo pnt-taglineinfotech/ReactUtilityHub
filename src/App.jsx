@@ -18,6 +18,7 @@ const DiceRoller = lazy( () => import( './pages/DiceRoller' ) );
 const MovieSearch = lazy( () => import( './pages/MovieSearch' ) );
 const PasswordGenerator = lazy( () => import( './pages/PasswordGenerator' ) );
 const URLParser = lazy( () => import( './pages/URLParser' ) );
+const Test = lazy( () => import( './pages/Test' ) );
 
 export default function App() {
 
@@ -43,6 +44,7 @@ export default function App() {
 				<Route path="/movie-search" element={ <MovieSearch /> } />
 				<Route path="/password-generator" element={ <PasswordGenerator /> } />
 				<Route path="/url-parser" element={ <URLParser /> } />
+				<Route path="/test" element={ <Test /> } />
 				<Route path="*" element={ <NotFound /> } />
 
 			</Routes>

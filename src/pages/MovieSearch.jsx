@@ -1,6 +1,7 @@
-import { ArrowLeft, ImageOff, Loader2, Search, Star, Vote, X } from "lucide-react";
+import { ArrowLeft, Film, ImageOff, Loader2, Search, Star, Trophy, Users, Clapperboard, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MovieAPI } from "../assets/js/common";
 
 export default function MovieSearch() {
 
@@ -10,9 +11,15 @@ export default function MovieSearch() {
 	const [ loading, setLoading ] = useState( false );
 	const [ error, setError ] = useState( null );
 
-	const [ dialog, setDialog ] = useState( { show: false } );
+	const [ dialog, setDialog ] = useState( { show: false, tt: null } );
 
-	async function getMovie() {
+	async function getMovie( e ) {
+
+		if ( e )
+			e.preventDefault();
+
+		if ( !search.trim() )
+			return;
 
 		setResult( [] );
 		setError( null );
@@ -20,141 +27,197 @@ export default function MovieSearch() {
 
 		try {
 
-			const res = await fetch( `https://www.omdbapi.com/?apikey=${ import.meta.env.VITE_MOVIE_API_KEY }&s=${ search }` );
-			if ( !res.ok )
-				throw new Error( `HTTP error!\nStatus:${ res.status }` );
+			MovieAPI.searchParams.append( 's', search.trim() );
+			const res = await fetch( MovieAPI );
+			if ( !res.ok ) throw new Error( `HTTP error!\nStatus:${ res.status }` );
 
 			const { Search } = await res.json();
 
 			if ( !Array.isArray( Search ) || Search.length <= 0 )
-				throw new Error( 'No Match Result Found!' );
+				throw new Error( 'No matching movies found!' );
 
 			setResult( Search );
 
-		} catch ( error ) {
-			setError( error.message );
+		} catch ( err ) {
+			setError( err.message );
 		} finally {
+
+			MovieAPI.searchParams.delete( 's' );
 			setLoading( false );
+
 		}
 
 	}
 
-	return <main className="min-h-[88vh] pt-10">
+	return <main className="min-h-[86.1vh] bg-gray-50 font-sans py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
 
-		<button
-			type="button"
-			className="p-2 ms-50 bg-slate-600 hover:bg-slate-700 border border-slate-300 hover:border-slate-400 rounded-xl cursor-pointer"
-			onClick={ () => navigate( '/', { replace: true } ) }
-		>
-			<ArrowLeft size={ 20 } color="white" />
-		</button>
+		<div className="w-full max-w-5xl">
 
-		<section className="w-3/7 mx-auto p-5 flex flex-col gap-5">
+			<div className="flex items-center justify-between mb-8">
 
-			<h1 className="text-3xl text-center font-semibold">Movie Search</h1>
+				<button
+					type="button"
+					className="p-2 bg-white hover:bg-gray-100 shadow-sm border border-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+					onClick={ () => navigate( '/', { replace: true } ) }
+					aria-label="Go back"
+				>
+					<ArrowLeft size={ 20 } className="stroke-gray-600" />
+				</button>
 
-			<section className="w-full p-5 border border-gray-300 rounded-xl">
+				<h1 className="flex items-center gap-2">
 
-				<label htmlFor="input-search" className="text-xs select-none">Movie Name</label>
+					<Film size={ 26 } className="stroke-indigo-600" />
+					<span className="text-2xl font-bold text-gray-900 tracking-tight">Movie Search</span>
 
-				<section className="flex gap-5 items-center select-none">
+				</h1>
+				<div className="w-9" />
 
-					<input
-						id="input-search"
-						type="text"
-						className="grow px-1 text-lg border-b border-gray-400 outline-none focus:border-b-2"
-						value={ search }
-						onChange={ e => setSearch( e.target.value ) }
-						disabled={ false }
-					/>
+			</div>
+
+			<div className="bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-100 p-6 mb-8">
+
+				<form onSubmit={ getMovie } className="flex flex-col sm:flex-row gap-3">
+
+					<div className="relative grow">
+
+						<Search size={ 20 } className="absolute left-4 top-1/2 -translate-y-1/2 stroke-gray-400" />
+						<input
+							id="input-search"
+							type="text"
+							placeholder="Search movies, TV series (e.g. Inception, Batman)..."
+							className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl font-medium text-gray-800 shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all placeholder-gray-400"
+							value={ search }
+							onChange={ e => setSearch( e.target.value ) }
+						/>
+						{ search && <button
+							type="button"
+							className="w-fit rounded-full group"
+							onClick={ () => {
+
+								setSearch( '' );
+								setResult( [] );
+
+							} }
+						>
+							<X size={ 20 } className="absolute right-4 top-1/2 -translate-y-1/2 stroke-gray-400 group-hover:stroke-gray-500" />
+						</button> }
+
+					</div>
 
 					<button
-						className="p-2 bg-green-700 not-disabled:hover:bg-green-800 border border-green-400 not-disabled:hover:border-green-500 rounded-xl flex justify-center items-center cursor-pointer disabled:cursor-not-allowed"
-						onClick={ getMovie }
-						disabled={ loading || !search }
+						type="submit"
+						className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all hover:shadow-indigo-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+						disabled={ loading || !search.trim() }
 					>
-						<Search size={ 25 } color="white" />
+
+						{ loading ?
+							<Loader2 size={ 20 } className="stroke-white animate-spin" />
+						:
+							<span className="text-white font-semibold">Search</span>
+						}
+
 					</button>
 
-				</section>
+				</form>
 
-			</section>
+			</div>
 
-		</section>
+			{ loading && <div className="py-20 flex flex-col items-center justify-center gap-3">
 
-		{ loading && <section className="w-5/7 h-100 mt-5 mx-auto p-5 border border-gray-300 rounded-xl text-gray-600 text-center font-semibold flex justify-center items-center">
+				<Loader2 size={ 48 } className="stroke-indigo-600 animate-spin" />
+				<p className="text-sm font-medium text-gray-500">Searching movie database...</p>
 
-			<section className="flex flex-col justify-center">
+			</div> }
 
-				<Loader2 size={ 50 } color="#99a1af" className="animate-spin m-auto" />
-				<span className="text-gray-400">Loading...</span>
+			{ ( !loading && !!error ) && <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm flex flex-col items-center gap-2">
 
-			</section>
+				<Film size={ 40 } className="stroke-gray-300 stroke-1" />
+				<p className="text-gray-600 text-center font-medium">{ error }</p>
 
-		</section> }
+			</div> }
 
-		{ ( result.length > 0 || !!error ) && <section className="w-4/5 max-h-[58vh] mx-auto p-5 overflow-y-scroll scrollbar-none">
+			{ ( !loading && !error && result.length > 0 ) && <div>
 
-			<section className="text-2xl text-center font-semibold">Search Result</section>
+				<div className="flex items-center justify-between mb-6">
 
-			{ !!error && <section className="mt-5 mx-auto p-5 border border-gray-300 rounded-xl text-gray-600 text-center font-semibold">{ error }</section> }
+					<h2 className="flex items-baseline gap-1">
 
-			{ ( !error && result.length > 0 ) && <section className="mt-5 flex gap-5">
+						<span className="text-xl font-bold text-gray-900">Search Results</span>
+						<span className="text-sm font-normal text-gray-500">({ result.length })</span>
 
-				<section className="w-full mt-5 grid grid-cols-3 gap-5">
+					</h2>
 
-					{ result.map( ( movie, idx ) => {
+				</div>
 
-						return <section key={ `movie-${ idx }` } className="p-5 border border-gray-300 rounded-xl flex flex-col gap-5">
+				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-							<Image src={ movie.Poster } />
+					{ result.map( ( movie, idx ) => <div 
+						key={ `movie-${ idx }` } 
+						className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group"
+					>
 
-							<section className="grow">
+						<div className="relative overflow-hidden aspect-2/3 bg-gray-100">
 
-								<section className="font-semibold">{ movie.Title }</section>
+							<Image src={ movie.Poster } alt={ movie.Title } />
+							<span className="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+								{ movie.Type }
+							</span>
 
-								<section>
-									<span className="font-semibold">Year:</span> { movie.Year }
-								</section>
+						</div>
 
-								<section>
-									<span className="font-semibold">Type:</span> { movie.Type }
-								</section>
+						<div className="p-5 flex flex-col grow justify-between gap-4">
 
-							</section>
+							<div>
+
+								<h3 className="font-bold text-gray-900 text-base line-clamp-1 group-hover:text-indigo-600 transition-colors" title={ movie.Title }>
+									{ movie.Title }
+								</h3>
+								<p className="text-xs font-semibold text-gray-400 mt-1">Year: { movie.Year }</p>
+
+							</div>
 
 							<button
 								type="button"
-								className="w-2/7 p-2 self-center bg-blue-500 not-disabled:hover:bg-blue-600 border border-blue-400 not-disabled:hover:border-blue-500 rounded-xl cursor-pointer"
+								className="w-full py-2.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2"
 								onClick={ () => setDialog( { show: true, tt: movie.imdbID } ) }
-							><span className="text-center text-white">View</span></button>
+							>
+								View Details
+							</button>
 
-						</section>;
+						</div>
 
-					} ) }
+					</div> ) }
 
-				</section>
+				</div>
 
-			</section> }
+			</div> }
 
-		</section> }
+		</div>
 
-		{ dialog.show && <Dialog tt={ dialog.tt } onDismiss={ () => setDialog( { show: false } ) } /> }
+		{ dialog.show && <Dialog tt={ dialog.tt } onDismiss={ () => setDialog( { show: false, tt: null } ) } /> }
 
 	</main>;
 
 }
 
-function Image( { src } ) {
+function Image( { src, alt } ) {
 
 	const [ imageError, setImageError ] = useState( false );
 
-	return !imageError ?
-		<img src={ src } className="w-full h-100" onError={ () => setImageError( true ) } />
-		:
-		<section className="h-100 bg-gray-200 flex justify-center items-center">
-			<ImageOff size={ 50 } color="#99a1af" />
-		</section>;
+	if ( !src || src === 'N/A' || imageError )
+		return <div className="size-full min-h-62.5 bg-gray-100 flex flex-col items-center justify-center gap-2">
+
+			<ImageOff size={ 36 } className="stroke-1 stroke-gray-400" />
+			<span className="text-xs text-gray-400 font-medium">No Poster Available</span>
+
+		</div>;
+
+	return <img 
+		src={ src } 
+		alt={ alt || 'Movie poster' } 
+		className="size-full object-cover transition-transform duration-500 group-hover:scale-105" 
+		onError={ () => setImageError( true ) } 
+	/>;
 
 }
 
@@ -162,7 +225,7 @@ function Dialog( { tt, onDismiss } ) {
 
 	const dialogRef = useRef( null );
 	const [ loading, setLoading ] = useState( false );
-	const [ result, setResult ] = useState( {} );
+	const [ result, setResult ] = useState( null );
 	const [ error, setError ] = useState( null );
 
 	useEffect( () => {
@@ -170,7 +233,7 @@ function Dialog( { tt, onDismiss } ) {
 		const controller = new AbortController();
 		let isMounted = true;
 
-		if ( isMounted )
+		if ( isMounted ) {
 			( async () => {
 
 				dialogRef.current?.showModal();
@@ -178,107 +241,179 @@ function Dialog( { tt, onDismiss } ) {
 
 				try {
 
-					const res = await fetch( `https://www.omdbapi.com/?apikey=${ import.meta.env.VITE_MOVIE_API_KEY }&plot=full&i=${ tt }`, { signal: controller.signal } );
+					MovieAPI.searchParams.append( 'plot', 'full' );
+					MovieAPI.searchParams.append( 'i', tt );
+					const res = await fetch( MovieAPI, { signal: controller.signal } );
 					if ( !res.ok )
 						throw new Error( `HTTP error!\nStatus:${ res.status }` );
 
 					const data = await res.json();
-
-					if ( !data )
-						throw new Error( 'No Match Result Found!' );
+					if ( !data || data.Response === 'False' )
+						throw new Error( 'Failed to load movie details.' );
 
 					setResult( data );
 
-				} catch ( error ) {
+				} catch ( err ) {
 
-					if ( error.name !== 'AbortError' )
-						setError( error.message );
+					if ( err.name !== 'AbortError' ) {
+
+						setError( err.message );
+						console.error( err );
+
+					}
 
 				} finally {
+
+					MovieAPI.searchParams.delete( 'plot' );
+					MovieAPI.searchParams.delete( 'i' );
 					setLoading( false );
+
 				}
 
 			} )();
 
+		}
+
 		return () => {
 
 			isMounted = false;
+			MovieAPI.searchParams.delete( 'plot' );
+			MovieAPI.searchParams.delete( 'i' );
 			setLoading( false );
-			setResult( {} );
+			setResult( null );
 			setError( null );
 			controller.abort();
 
-		}
+		};
 
-	}, [] );
+	}, [ tt ] );
 
-	return <dialog ref={ dialogRef } className="w-4/5 m-auto p-5 rounded-2xl">
-			
-		<section className="flex items-center">
+	return <dialog 
+		ref={ dialogRef } 
+		className="w-full max-w-4xl p-0 rounded-3xl shadow-2xl backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm overflow-hidden border border-gray-100 m-auto"
+		onClose={ onDismiss }
+	>
 
-			<h3 className="grow text-xl font-semibold">Movie Info</h3>
-			<button
-				type="button"
-				className="p-2 hover:bg-red-100 rounded-full group"
-				onClick={ () => {
+		<div className="bg-white flex flex-col max-h-[90vh]">
 
-					dialogRef.current?.close();
-					onDismiss();
+			<div className="p-5 px-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-10">
 
-				} }
-			><X size={ 25 } className="stroke-red-400 group-hover:stroke-red-600" /></button>
+				<h3 className="flex items-center gap-2">
 
-		</section>
+					<Clapperboard size={ 20 } className="stroke-indigo-600" />
+					<span className="text-lg font-bold text-gray-900">Movie Details</span>
 
-		{ loading && <section className="mt-5 h-100 flex justify-center items-center">
-			<Loader2 size={ 50 } color="#99a1af" className="animate-spin" />
-		</section> }
+				</h3>
 
-		{ !!error && <section className="mt-5 h-100 flex justify-center items-center ">
-			<span className="text-gray-600 text-center font-semibold">{ error }</span>
-		</section> }
+				<button
+					type="button"
+					className="p-2 hover:bg-gray-100 rounded-full group transition-colors"
+					onClick={ () => {
 
-		{ !!result && <section className="mt-5 grid grid-cols-3 gap-5">
+						dialogRef.current?.close();
+						onDismiss();
 
-			<section className="col-span-2 max-h-100 overflow-y-scroll scrollbar-none hover:scrollbar-thin">
+					} }
+				>
+					<X size={ 20 } className="stroke-gray-500 group-hover:stroke-gray-900 transition-colors" />
+				</button>
 
-				<h4 className="text-4xl">{ result.Title }</h4>
-				<p>{ result.Year } • { result.Language } • { result.Country }</p>
+			</div>
 
-				<p className="mt-5">Directed by { result.Director }</p>
-				<p>Written by { result.Writer }</p>
+			<div className="p-6 sm:p-8 overflow-y-auto">
 
-				<p className="mt-5">Starred by { result.Actors }</p>
+				{ loading && <div className="py-20 flex flex-col items-center justify-center gap-3">
 
-				<p className="mt-5">{ result.Plot }</p>
+					<Loader2 size={ 44 } className="stroke-indigo-600 animate-spin" />
+					<p className="text-sm font-medium text-gray-500">Loading film details...</p>
 
-				<p className="mt-5">Awards: { result.Awards }</p>
+				</div> }
 
-				<p className="mt-5">BoxOffice: { result.BoxOffice }</p>
+				{ !!error && <div className="py-12 text-center text-red-500 font-medium">{ error }</div> }
 
-				<p className="mt-5">Rating:</p>
-				<ol>
-					{ result.Ratings?.length > 0 ?
-						result.Ratings.map( ( rating, idx ) => <li key={ `rating-list-${ idx + 1 }` }>{ rating.Source }: { rating.Value }</li> )
-						:
-						<li>No Rating</li>
-					}
-				</ol>
+				{ ( !loading && !!result ) && <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-			</section>
+					<div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100 aspect-2/3 max-w-70 mx-auto md:mx-0 w-full">
+						<Image src={ result.Poster } alt={ result.Title } />
+					</div>
 
-			<section>
-				<Image src={ result.Poster } />
-			</section>
+					<div className="md:col-span-2 flex flex-col gap-5">
 
-			<section className="col-span-full flex items-center gap-5">
+						<div>
 
-				<section className="flex justify-center items-center gap-2"><Star size={ 20 } color="#99a1af"/> { result.imdbRating }</section>
-				<section className="flex justify-center items-center gap-2"><Vote size={ 20 } color="#99a1af"/> { result.imdbVotes }</section>
+							<h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">{ result.Title }</h2>
+							<p className="text-sm font-semibold text-indigo-600 mt-1">
+								{ result.Year } • { result.Rated } • { result.Runtime } • { result.Genre }
+							</p>
 
-			</section>
+						</div>
 
-		</section> }
+						<div className="flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+
+							<div className="flex items-center gap-1.5 font-bold text-gray-800">
+
+								<Star size={ 18 } className="stroke-amber-500 fill-amber-500" />
+								<span>{ result.imdbRating } <span className="text-xs text-gray-400 font-normal">/10 ({ result.imdbVotes } votes)</span></span>
+
+							</div>
+
+							{ ( result.Metascore && result.Metascore !== 'N/A' ) && <div className="flex items-center gap-1.5 font-semibold text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg">
+								Metascore: { result.Metascore }
+							</div> }
+
+						</div>
+
+						<div>
+
+							<h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Overview</h4>
+							<p className="text-gray-700 leading-relaxed text-sm sm:text-base">{ result.Plot }</p>
+
+						</div>
+
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm border-t border-gray-100 pt-4">
+
+							<div>
+
+								<span className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Director</span>
+								<span className="font-semibold text-gray-800">{ result.Director }</span>
+
+							</div>
+
+							<div>
+
+								<span className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Box Office</span>
+								<span className="font-semibold text-gray-800">{ result.BoxOffice || 'N/A' }</span>
+
+							</div>
+
+							<div className="sm:col-span-2">
+
+								<section className="mb-0.5 flex items-center gap-1">
+
+									<Users size={ 12 } className="stroke-gray-400" />
+									<span className="text-xs font-bold uppercase tracking-wider text-gray-400">Starring</span>
+
+								</section>
+								<span className="font-medium text-gray-700">{ result.Actors }</span>
+
+							</div>
+
+							{ ( result.Awards && result.Awards !== 'N/A' ) && <div className="sm:col-span-2 bg-amber-50/60 border border-amber-200/60 p-3 rounded-xl flex items-center gap-2">
+
+								<Trophy size={ 16 } className="stroke-amber-600 shrink-0" />
+								<span className="text-amber-900 text-xs font-medium">{ result.Awards }</span>
+
+							</div> }
+
+						</div>
+
+					</div>
+
+				</div> }
+
+			</div>
+
+		</div>
 
 	</dialog>;
 

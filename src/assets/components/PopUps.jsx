@@ -1,98 +1,162 @@
 import { useEffect, useRef } from "react";
+import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react";
 
 const dialogVariant = {
-    default: {
-        bg: 'bg-indigo-50 shadow-indigo-300',
-        text: 'text-indigo-600',
-        btn: 'bg-indigo-400 hover:bg-indigo-500'
-    },
-    success: {
-        bg: 'bg-green-50 shadow-green-300',
-        text: 'text-green-600',
-        btn: 'bg-green-400 hover:bg-green-500'
-    },
-    danger: {
-        bg: 'bg-red-50 shadow-red-300',
-        text: 'text-red-600',
-        btn: 'bg-red-400 hover:bg-red-500'
-    },
-    warning: {
-        bg: 'bg-orange-50 shadow-orange-300',
-        text: 'text-orange-600',
-        btn: 'bg-orange-400 hover:bg-orange-500'
-    }
+	default: {
+		bg: 'bg-white',
+		border: 'border-indigo-100',
+		text: 'text-indigo-600',
+		iconBg: 'bg-indigo-50',
+		iconColor: 'stroke-indigo-600',
+		btn: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20',
+		Icon: Info
+	},
+	success: {
+		bg: 'bg-white',
+		border: 'border-emerald-100',
+		text: 'text-emerald-600',
+		iconBg: 'bg-emerald-50',
+		iconColor: 'stroke-emerald-600',
+		btn: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20',
+		Icon: CheckCircle2
+	},
+	danger: {
+		bg: 'bg-white',
+		border: 'border-red-100',
+		text: 'text-red-600',
+		iconBg: 'bg-red-50',
+		iconColor: 'stroke-red-600',
+		btn: 'bg-red-600 hover:bg-red-700 shadow-red-600/20',
+		Icon: XCircle
+	},
+	warning: {
+		bg: 'bg-white',
+		border: 'border-amber-100',
+		text: 'text-amber-600',
+		iconBg: 'bg-amber-50',
+		iconColor: 'stroke-amber-600',
+		btn: 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20',
+		Icon: AlertTriangle
+	}
 };
 
 export function Alert( { show = false, title, message, variant = 'default', buttontext = 'Ok', action = () => {} } ) {
 
-    const dialogRef = useRef( null );
+	const dialogRef = useRef( null );
 
-    useEffect( () => show ? dialogRef.current?.showModal() : dialogRef.current?.close(), [ show ] );
+	useEffect( () => {
 
-    const { text, btn, bg } = dialogVariant[ variant ] || dialogVariant.default;
+		if ( show )
+			dialogRef.current?.showModal();
+		else
+			dialogRef.current?.close();
 
-    return <dialog className={ `m-auto p-5 border border-gray-300 rounded-3xl md:w-2/5 ${ bg } backdrop:backdrop-blur-xs select-none shadow-2xl` } ref={ dialogRef }>
+	}, [ show ] );
 
-        { show && <>
+	const { text, btn, iconBg, iconColor, border, Icon } = dialogVariant[ variant ] || dialogVariant.default;
 
-            <div className={ `text-3xl font-semibold text-center ${ text }` }>{ title || 'Alert' }</div>
-            <div className="p-5">{ message || 'This alert do\'nt have a message.' }</div>
-            <button
-                className={ `block mx-auto text-lg ${ btn } text-white rounded-2xl px-4 py-2 cursor-pointer` }
-                onClick={ () => {
+	return <dialog 
+		ref={ dialogRef }
+		className={ `m-auto p-0 border ${ border } rounded-3xl w-11/12 max-w-md bg-white shadow-2xl backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm select-none transition-all` }
+	>
 
-                    action();
-                    dialogRef.current?.close();
-                
-                } }
-            >{ buttontext }</button>
+		{ show && <div className="p-6 sm:p-8 flex flex-col items-center text-center">
 
-        </> }
+			<div className={ `p-3.5 rounded-2xl ${ iconBg } mb-4 shadow-sm` }>
+				<Icon size={ 32 } className={ iconColor } />
+			</div>
 
-    </dialog>;
+			<h3 className={ `text-xl font-bold tracking-tight ${ text } mb-2` }>
+				{ title || 'Alert' }
+			</h3>
+
+			<p className="text-sm font-medium text-gray-500 leading-relaxed mb-6">
+				{ message || 'This alert does not have a message.' }
+			</p>
+
+			<button
+				type="button"
+				className={ `w-full py-3 px-6 text-sm font-semibold text-white rounded-xl ${ btn } shadow-lg transition-all cursor-pointer focus:outline-none` }
+				onClick={ () => {
+					action();
+					dialogRef.current?.close();
+				} }
+			>
+				{ buttontext }
+			</button>
+
+		</div> }
+
+	</dialog>;
 
 }
 
 export function Confirm( { show = false, title, message, variant = 'default', buttontext = 'Ok', action = () => {}, cancel = () => {} } ) {
 
-    const dialogRef = useRef( null );
+	const dialogRef = useRef( null );
 
-    useEffect( () => show ? dialogRef.current?.showModal() : dialogRef.current?.close(), [ show ] );
+	useEffect( () => {
 
-    const { text, btn, bg } = dialogVariant[ variant ] || dialogVariant.default;
+		if ( show )
+			dialogRef.current?.showModal();
+		else
+			dialogRef.current?.close();
 
-    return <dialog className={ `m-auto p-5 border border-gray-300 rounded-3xl md:w-2/5 ${ bg }` } ref={ dialogRef }>
+	}, [ show ] );
 
-        { show && <>
+	const { text, btn, iconBg, iconColor, border, Icon } = dialogVariant[ variant ] || dialogVariant.default;
 
-            <div className={ `text-3xl font-semibold text-center ${ text }` }>{ title || 'Alert' }</div>
-            <div className="p-5">{ message || 'This alert do\'nt have a message.' }</div>
-            <div className="w-full flex justify-around">
+	return <dialog 
+		ref={ dialogRef }
+		className={ `m-auto p-0 border ${ border } rounded-3xl w-11/12 max-w-md bg-white shadow-2xl backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm select-none transition-all` }
+	>
 
-                <button
-                    className="text-lg bg-gray-400 hover:bg-gray-500 text-white rounded-2xl px-4 py-2 cursor-pointer"
-                    onClick={ () => {
-                        
-                        cancel();
-                        dialogRef.current?.close();
-                    
-                    } }
-                >Cancel</button>
+		{ show && <div className="p-6 sm:p-8 flex flex-col items-center text-center">
 
-                <button
-                    className={ `text-lg ${ btn } text-white rounded-2xl px-4 py-2 cursor-pointer` }
-                    onClick={ () => {
+			<div className={ `p-3.5 rounded-2xl ${ iconBg } mb-4 shadow-sm` }>
+				<Icon size={ 32 } className={ iconColor } />
+			</div>
 
-                        action();
-                        dialogRef.current?.close();
+			<h3 className={ `text-xl font-bold tracking-tight ${ text } mb-2` }>
+				{ title || 'Confirm Action' }
+			</h3>
 
-                    } }
-                >{ buttontext }</button>
+			<p className="text-sm font-medium text-gray-500 leading-relaxed mb-6">
+				{ message || 'Are you sure you want to proceed with this action?' }
+			</p>
 
-            </div>
+			<div className="w-full flex items-center gap-3">
 
-        </> }
+				<button
+					type="button"
+					className="flex-1 py-3 px-4 text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors cursor-pointer focus:outline-none"
+					onClick={ () => {
 
-    </dialog>;
+						cancel();
+						dialogRef.current?.close();
+
+					} }
+				>
+					Cancel
+				</button>
+
+				<button
+					type="button"
+					className={ `flex-1 py-3 px-4 text-sm font-semibold text-white rounded-xl ${ btn } shadow-lg transition-all cursor-pointer focus:outline-none` }
+					onClick={ () => {
+
+						action();
+						dialogRef.current?.close();
+
+					} }
+				>
+					{ buttontext }
+				</button>
+
+			</div>
+
+		</div> }
+
+	</dialog>;
 
 }

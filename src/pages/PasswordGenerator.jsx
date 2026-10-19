@@ -1,4 +1,4 @@
-import { ArrowLeft, Copy, CopyCheck } from "lucide-react";
+import { ArrowLeft, Copy, CopyCheck, KeyRound, RefreshCw, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert } from "../assets/components/PopUps";
@@ -6,210 +6,276 @@ import { Alert } from "../assets/components/PopUps";
 export default function PasswordGenerator() {
 
 	const navigate = useNavigate();
-	const [ options, setOptions ] = useState( { length: 8, upper: false, lower:true, number: false, symbol: false } );
+	const [ options, setOptions ] = useState( { length: 12, upper: true, lower: true, number: true, symbol: false } );
 	const [ password, setPassword ] = useState( '' );
 	const [ loading, setLoading ] = useState( false );
 	const [ copied, setCopied ] = useState( false );
 	const [ alert, setAlert ] = useState( { show: false } );
 
-	return <main className="min-h-[88vh] pt-10">
+	const generatePassword = () => {
 
-		<button
-			type="button"
-			className="p-2 ms-50 bg-slate-600 hover:bg-slate-700 border border-slate-300 hover:border-slate-400 rounded-xl cursor-pointer"
-			onClick={ () => navigate( '/', { replace: true } ) }
-		>
-			<ArrowLeft size={ 20 } color="white" />
-		</button>
+		setLoading( true );
 
-		<section className="w-3/7 mx-auto p-5 flex flex-col gap-5">
+		let root = '';
+		if ( options.upper )
+			root += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		if ( options.lower )
+			root += 'abcdefghijklmnopqrstuvwxyz';
+		if ( options.number )
+			root += '0123456789';
+		if ( options.symbol )
+			root += '!@#$%^&*()_+-=[]{}|;:,.<>?';
 
-			<h1 className="text-3xl text-center font-semibold">Password Generator</h1>
+		if ( root === '' ) {
 
-			<section className="w-full p-5 border border-gray-300 rounded-xl flex flex-col">
+			setPassword( '' );
+			setLoading( false );
+			return;
 
-				<label htmlFor="output-password" className="text-xs">Password</label>
-				<section className="flex flex-row gap-2 items-center">
+		}
 
-				<input
-					type="text"
-					id="output-password"
-					className="grow text-lg border-b border-gray-400 outline-none focus:border-b-2"
-					value={ password }
-					readOnly={ true }
-				/>
+		let answer = '';
+		for ( let i = 0; i < options.length; i++ )
+			answer += root.charAt( Math.floor( Math.random() * root.length ) );
+
+		setPassword( answer );
+		setLoading( false );
+
+	};
+
+	const strength = ( () => {
+
+		if ( !password )
+			return { label: 'None', color: 'bg-gray-200', text: 'text-gray-400', percent: 0, Icon: Shield };
+
+		let score = 0;
+		if ( options.length >= 12 )
+			score += 1;
+		if ( options.length >= 16 )
+			score += 1;
+		if ( options.upper && options.lower )
+			score += 1;
+		if ( options.number )
+			score += 1;
+		if ( options.symbol )
+			score += 1;
+
+		if ( score <= 2 )
+			return { label: 'Weak', color: 'bg-red-500', text: 'text-red-500', percent: 33, Icon: ShieldAlert, stroke: 'stroke-red-500' };
+
+		if ( score <= 4 )
+			return { label: 'Medium', color: 'bg-amber-500', text: 'text-amber-500', percent: 66, Icon: Shield, stroke: 'stroke-amber-500' };
+
+		return { label: 'Strong', color: 'bg-emerald-500', text: 'text-emerald-500', percent: 100, Icon: ShieldCheck, stroke: 'stroke-emerald-500' };
+
+	} )();
+
+	return <main className="min-h-[86.1vh] bg-gray-50 text-gray-800 font-sans py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+
+		<div className="w-full max-w-2xl">
+
+			<div className="flex items-center justify-between mb-8">
 
 				<button
 					type="button"
-					className="p-2 bg-green-700 disabled:bg-green-500 not-disabled:hover:bg-green-800 border border-green-500 not-disabled:hover:border-green-600 rounded-lg cursor-pointer disabled:cursor-not-allowed"
-					disabled={ !password || loading || copied }
-					onClick={ async () => {
+					className="p-2 bg-white hover:bg-gray-100 shadow-sm border border-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+					onClick={ () => navigate( '/', { replace: true } ) }
+					aria-label="Go back"
+				>
+					<ArrowLeft size={ 20 } className="stroke-gray-600" />
+				</button>
 
-						if ( !password ) return;
+				<h1 className="flex items-center gap-2">
 
-						await navigator.clipboard.writeText( password ).then( () => {
+					<KeyRound size={ 24 } className="stroke-emerald-600" />
+					<span className="text-2xl font-bold text-gray-900 tracking-tight">Password Generator</span>
 
-							setCopied( true );
-							setTimeout( () => setCopied( false ), 2000 );
+				</h1>
 
-						} ).catch( error => {
+				<div className="w-9" />
 
-							console.error( error );
-							setAlert( {
-								show: true,
-								title: 'Failure',
-								message: error.message,
-								variant: 'danger',
-								buttontext: 'Ok',
-								action: () => setAlert( { show: false } )
-							} );
+			</div>
 
-						} );
+			<div className="bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-100">
 
-					} }
-				>{ copied ? <CopyCheck size={ 20 } color="white"/> : <Copy size={ 20 } color="white"/> } </button>
+				<div className="p-6 sm:p-8 bg-slate-900 flex flex-col gap-4 relative overflow-hidden">
 
-				</section>
+					<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
 
-			</section>
+					<div className="flex items-center justify-between gap-4 relative z-10">
 
-			<section className="w-full p-5 border border-gray-300 rounded-xl grid grid-cols-2 gap-y-5">
-
-				<section className="col-span-2 flex flex-col gap-1">
-
-					<span className="grow cursor-pointer">Length: { options.length }</span>
-
-					<section className="flex flex-row gap-1 items-center">
-
-						<span className="p-2">8</span>
 						<input
-							type="range"
-							id="range-length"
-							min={ 8 }
-							max={ 64 }
-							value={ options.length }
-							className="grow cursor-pointer"
-							onChange={ e => setOptions( opt => ( { ...opt, length: e.target.value } ) ) }
+							type="text"
+							id="output-password"
+							placeholder="Generated Password"
+							className="w-full text-xl sm:text-2xl font-mono text-emerald-400 bg-transparent outline-none placeholder-slate-600 tracking-wider truncate"
+							value={ password }
+							readOnly={ true }
 						/>
-						<span className="p-2">64</span>
 
-					</section>
+						<button
+							type="button"
+							className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 rounded-xl transition-all shadow-md shadow-emerald-900/20 cursor-pointer disabled:cursor-not-allowed shrink-0 group"
+							disabled={ !password || loading || copied }
+							onClick={ async () => {
 
-				</section>
+								if ( !password )
+									return;
 
-				<section className="flex flex-row gap-5 items-center">
+								try {
 
-					<input
-						type="checkbox"
-						id="check-UpperCase"
-						className="size-5 cursor-pointer"
-						checked={ options.upper }
-						onChange={ e => setOptions( opt => ( { ...opt, upper: e.target.checked } ) ) }
-					/>
-					<label htmlFor="check-UpperCase" className="grow cursor-pointer">Upper Case</label>
+									await navigator.clipboard.writeText( password );
+									setCopied( true );
+									setTimeout( () => setCopied( false ), 2000 );
 
-				</section>
+								} catch ( error ) {
 
-				<section className="flex flex-row gap-5 items-center">
+									console.error( error );
+									setAlert( {
+										show: true,
+										title: 'Failure',
+										message: error.message,
+										variant: 'danger',
+										buttontext: 'Ok',
+										action: () => setAlert( { show: false } )
+									} );
 
-					<input
-						type="checkbox"
-						id="check-LowerCase"
-						className="size-5 cursor-pointer"
-						checked={ options.lower }
-						onChange={ e => setOptions( opt => ( { ...opt, lower: e.target.checked } ) ) }
-					/>
-					<label htmlFor="check-LowerCase" className="grow cursor-pointer">Lower Case</label>
+								}
 
-				</section>
+							} }
+						>
 
-				<section className="flex flex-row gap-5 items-center">
-
-					<input
-						type="checkbox"
-						id="check-Number"
-						className="size-5 cursor-pointer"
-						checked={ options.number }
-						onChange={ e => setOptions( opt => ( { ...opt, number: e.target.checked } ) ) }
-					/>
-					<label htmlFor="check-Number" className="grow cursor-pointer">Number</label>
-
-				</section>
-
-				<section className="flex flex-row gap-5 items-center">
-
-					<input
-						type="checkbox"
-						id="check-Symbol"
-						className="size-5 cursor-pointer"
-						checked={ options.symbol }
-						onChange={ e => setOptions( opt => ( { ...opt, symbol: e.target.checked } ) ) }
-					/>
-					<label htmlFor="check-Symbol" className="grow cursor-pointer">Symbol</label>
-
-				</section>
-
-				<section className="col-span-2 flex justify-around items-center">
-
-					{ password !== '' && <button
-						type="button"
-						className="w-1/4 p-2 bg-green-700 disabled:bg-green-500 not-disabled:hover:bg-green-800 rounded-lg text-white cursor-pointer disabled:cursor-not-allowed"
-						disabled={ loading }
-						onClick={ () => {
-
-							setOptions( {
-								length: 8,
-								upper: false,
-								lower:true,
-								number: false,
-								symbol: false
-							} );
-							setPassword( '' );
-
-						} }
-					>Clear</button> }
-
-					<button
-						type="button"
-						className="w-1/4 p-2 bg-green-700 disabled:bg-green-500 not-disabled:hover:bg-green-800 rounded-lg text-white cursor-pointer disabled:cursor-not-allowed"
-						disabled={ loading || options.length < 8 || options.length > 64 || ( !options.lower && !options.number && !options.symbol && !options.upper ) }
-						onClick={ () => {
-
-							setLoading( true );
-
-							let root = '';
-							if ( options.upper )
-								root += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-							if ( options.lower )
-								root += 'abcdefghijklmnopqrstuvwxyz';
-							if ( options.number )
-								root += '0123456789';
-							if ( options.symbol )
-								root += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
-							if ( root === '' ) {
-
-								setPassword( '' );
-								setLoading( false );
-								return;
-
+							{ copied ?
+								<CopyCheck size={ 18 } className="stroke-white" />
+							:
+								<Copy size={ 18 } className="stroke-white" />
 							}
+							<span className="hidden sm:inline text-white group-disabled:text-slate-600 font-medium">{ copied ? 'Copied!' : 'Copy' }</span>
 
-							let answer = '';
-							for ( let i = 0; i <= options.length; i++ )
-								answer += root.charAt( Math.floor( Math.random() * root.length ) );
+						</button>
 
-							setPassword( answer );
-							setLoading( false );
+					</div>
 
-						} }
-					>{ password ? 'Re-generate' : 'Generate' }</button>
-				
-				</section>
+					{ password && <div className="relative z-10 flex items-center justify-between gap-3 pt-2 border-t border-slate-800">
 
-			</section>
+						<div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
 
-		</section>
+							<strength.Icon size={ 14 } className={ strength.stroke } />
+							<span>Strength: <strong className={ strength.text }>{ strength.label }</strong></span>
+
+						</div>
+
+						<div className="w-28 sm:w-36 h-2 bg-slate-800 rounded-full overflow-hidden">
+							<div
+								className={ `h-full transition-all duration-300 ${ strength.color }` }
+								style={ { width: `${ strength.percent }%` } }
+							/>
+						</div>
+
+					</div> }
+
+				</div>
+
+				<div className="p-6 sm:p-8 flex flex-col gap-6">
+
+					<div className="bg-gray-50 p-5 rounded-2xl border border-gray-200/80">
+
+						<div className="flex justify-between items-center mb-3">
+
+							<label htmlFor="range-length" className="text-sm font-semibold text-gray-700">
+								Password Length
+							</label>
+
+							<span className="text-lg font-mono font-bold text-emerald-600 bg-white px-3 py-1 rounded-lg border border-gray-200 shadow-sm">
+								{ options.length }
+							</span>
+
+						</div>
+
+						<div className="flex items-center gap-3">
+
+							<span className="text-xs font-bold text-gray-400">8</span>
+							<input
+								type="range"
+								id="range-length"
+								min={ 8 }
+								max={ 64 }
+								value={ options.length }
+								className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+								onChange={ e => setOptions( opt => ( { ...opt, length: Number( e.target.value ) } ) ) }
+							/>
+							<span className="text-xs font-bold text-gray-400">64</span>
+
+						</div>
+
+					</div>
+
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+						{ [
+							{ id: 'check-UpperCase', key: 'upper', label: 'Include Uppercase (A-Z)' },
+							{ id: 'check-LowerCase', key: 'lower', label: 'Include Lowercase (a-z)' },
+							{ id: 'check-Number', key: 'number', label: 'Include Numbers (0-9)' },
+							{ id: 'check-Symbol', key: 'symbol', label: 'Include Symbols (!@#$)' }
+						].map( item => <label
+							key={ `password-options-${ item.id }` }
+							htmlFor={ item.id }
+							className={ `flex items-center gap-3 p-4 rounded-xl border transition-all cursor-pointer select-none ${
+								options[ item.key ] ?
+									'bg-emerald-50/50 border-emerald-200 text-emerald-950 font-medium'
+								:
+									'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+							}` }
+						>
+
+							<input
+								type="checkbox"
+								id={ item.id }
+								className="size-5 accent-emerald-600 rounded cursor-pointer"
+								checked={ options[ item.key ] }
+								onChange={ e => setOptions( opt => ( { ...opt, [ item.key ]: e.target.checked } ) ) }
+							/>
+							<span className="text-sm">{ item.label }</span>
+
+						</label> ) }
+
+					</div>
+
+					<div className="flex items-center gap-3 pt-2">
+
+						<button
+							type="button"
+							className="flex-1 py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-lg shadow-emerald-600/20 transition-all hover:shadow-emerald-600/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+							disabled={ loading || options.length < 8 || options.length > 64 || ( !options.lower && !options.number && !options.symbol && !options.upper ) }
+							onClick={ generatePassword }
+						>
+
+							<RefreshCw size={ 18 } className={ `stroke-white ${ loading ? 'animate-spin' : '' }` } />
+							<span className="text-white font-semibold">{ `${ password ? 'Re-g' : 'G' }enerate Password` }</span>
+
+						</button>
+
+						{ password !== '' && <button
+							type="button"
+							className="p-3.5 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-gray-700 font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+							onClick={ () => {
+
+								setOptions( { length: 12, upper: true, lower: true, number: true, symbol: false } );
+								setPassword( '' );
+
+							} }
+							title="Clear"
+						>
+							Clear
+						</button> }
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
 
 		{ alert.show && <Alert { ...alert } /> }
 

@@ -1,15 +1,17 @@
+import { Calculator, Calendar, CloudSun, Coins, Dices, Film, Hourglass, KeyRound, Link2, Ruler, Timer } from "lucide-react";
+
 export const utilities = [
-    [ 'Calculator', '/calculator' ],
-    [ 'Age Calculator', '/age-calculator' ],
-    [ 'Unit Converter', '/unit-converter' ],
-    [ 'Currency Converter', '/currency-converter' ],
-    [ 'Weather Forcast', '/weather-forcast' ],
-    [ 'Stopwatch', '/stopwatch' ],
-    [ 'Timer', '/timer' ],
-    [ 'Password Generator', '/password-generator' ],
-    [ 'Dice Roller', '/dice-roller' ],
-    [ 'URL Parser', '/url-parser' ],
-    [ 'Movie Search', '/movie-search' ]
+    [ 'Calculator', '/calculator', Calculator ],
+    [ 'Age Calculator', '/age-calculator', Calendar ],
+    [ 'Unit Converter', '/unit-converter', Ruler ],
+    [ 'Currency Converter', '/currency-converter', Coins ],
+    [ 'Weather Forcast', '/weather-forcast', CloudSun ],
+    [ 'Stopwatch', '/stopwatch', Timer ],
+    [ 'Timer', '/timer', Hourglass ],
+    [ 'Password Generator', '/password-generator', KeyRound ],
+    [ 'Dice Roller', '/dice-roller', Dices ],
+    [ 'URL Parser', '/url-parser', Link2 ],
+    [ 'Movie Search', '/movie-search', Film ]
 ];
 
 export const units = {
@@ -40,3 +42,7 @@ export const units = {
         Days: 86400
     }
 };
+
+const MovieAPI = new URL( 'https://www.omdbapi.com' );
+MovieAPI.searchParams.append( 'apikey', import.meta.env.VITE_MOVIE_API_KEY );
+export { MovieAPI };

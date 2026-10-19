@@ -1,4 +1,4 @@
-import { ArrowLeft, Pause, Play, Square } from "lucide-react";
+import { ArrowLeft, Hourglass, Pause, Play, Square } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert } from "../assets/components/PopUps";
@@ -16,150 +16,214 @@ export default function Timer() {
 	useEffect( () => {
 
 		if ( status === 'running' )
-			setTimeInterval( setInterval( () => {
+			setTimeInterval(
+				setInterval( () => {
 
-				const { hours, minutes, seconds } = startTime.since( Temporal.Now.plainDateTimeISO(), { largestUnit: 'hours', smallestUnit: 'seconds' } );
-				setTimer( { hours, minutes, seconds } );
+					const { hours, minutes, seconds } = startTime.since( Temporal.Now.plainDateTimeISO(), { 
+						largestUnit: 'hours', 
+						smallestUnit: 'seconds' 
+					} );
 
-				if ( !hours && !minutes && !seconds ) {
+					setTimer( { hours, minutes, seconds } );
 
+					if ( !hours && !minutes && !seconds ) {
+
+						setStatus( 'stop' );
+						setAlert( true );
+						return;
+
+					}
+
+					if ( hours <= 99 )
+						return;
 					setStatus( 'stop' );
-					setAlert( true );
-					return;
 
-				}
-
-				if ( hours <= 99 )
-					return;
-
-				setStatus( 'stop' );
-
-			} ) );
+				}, 100 )
+			);
 
 		if ( status === 'stop' ) {
-0
+
 			setTimer( { hours: 0, minutes: 0, seconds: 0 } );
 			setStartTime( null );
-			clearInterval( timeInterval );
+			if ( timeInterval )
+				clearInterval( timeInterval );
 			setTimeInterval( null );
 
 		}
 
-	}, [ status ] );
+		return () => {
 
-	return <main className="min-h-[88vh] pt-10">
+			if ( timeInterval )
+				clearInterval( timeInterval );
 
-		<button
-			type="button"
-			className="p-2 ms-50 bg-slate-600 hover:bg-slate-700 border border-slate-300 hover:border-slate-400 rounded-xl cursor-pointer"
-			onClick={ () => navigate( '/', { replace: true } ) }
-		>
-			<ArrowLeft size={ 20 } color="white" />
-		</button>
+		};
 
-		<section className="w-3/7 mx-auto p-5 flex flex-col gap-20">
+	}, [ status, startTime ] );
 
-			<p className="text-3xl text-center font-semibold">Timer</p>
+	const handleInput = ( val, max, field ) => {
 
-			<section className="text-7xl grid grid-cols-3 gap-2">
+		const num = Number( val );
+		if ( Number.isNaN( num ) )
+			return;
+		if ( num <= max )
+			setTimer( t => ( { ...t, [ field ]: num } ) );
 
-				<input
-					type="number"
-					min={ 0 }
-					max={ 99 }
-					className="border border-gray-300 rounded-2xl text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-					value={ String( timer.hours ).padStart( 2, '0' ) }
-					onChange={ e => {
+	};
 
-						const num = Number( e.target.value );
-						if ( num === NaN || e.target.readOnly )
-							return;
+	const isEditable = status === 'stop';
 
-						if ( num <= 99 )
-							setTimer( t => ( { ...t, hours: num } ) );
+	return <main className="min-h-[86.1vh] bg-gray-50 text-gray-800 font-sans py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
 
-					} }
-					readOnly={ [ 'running', 'pause' ].includes( status ) }
-				/>
-				<input
-					type="number"
-					min={ 0 }
-					max={ 59 }
-					className="border border-gray-300 rounded-2xl text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-					value={ String( timer.minutes ).padStart( 2, '0' ) }
-					onChange={ e => {
+		<div className="w-full max-w-xl">
 
-						const num = Number( e.target.value );
-						if ( num === NaN || e.target.readOnly )
-							return;
+			<div className="flex items-center justify-between mb-8">
 
-						if ( num <= 59 )
-							setTimer( t => ( { ...t, minutes: num } ) );
-
-					} }
-					readOnly={ [ 'running', 'pause' ].includes( status ) }
-				/>
-				<input
-					type="number"
-					min={ 0 }
-					max={ 59 }
-					className="border border-gray-300 rounded-2xl text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-					value={ String( timer.seconds ).padStart( 2, '0' ) }
-					onChange={ e => {
-
-						const num = Number( e.target.value );
-						if ( num === NaN || e.target.readOnly )
-							return;
-
-						if ( num <= 59 )
-							setTimer( t => ( { ...t, seconds: num } ) );
-
-					} }
-					readOnly={ [ 'running', 'pause' ].includes( status ) }
-				/>
-
-			</section>
-
-			<section className="flex justify-around items-center">
-
-				{ [ 'running', 'pause' ].includes( status ) && <button
-					className="size-15 bg-blue-400 hover:bg-blue-500 rounded-full flex justify-center items-center cursor-pointer"
-					onClick={ () => setStatus( 'stop' ) }
+				<button
+					type="button"
+					className="p-2 bg-white hover:bg-gray-100 shadow-sm border border-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+					onClick={ () => navigate( '/', { replace: true } ) }
+					aria-label="Go back"
 				>
-					<Square size={ 25 } color="white" fill="white" />
-				</button> }
+					<ArrowLeft size={ 20 } className="stroke-gray-600" />
+				</button>
 
-				{ status === 'running' && <button
-					className="size-15 bg-blue-400 hover:bg-blue-500 rounded-full flex justify-center items-center cursor-pointer"
-					onClick={ () => {
+				<h1 className="flex items-center gap-2">
 
-						setStatus( 'pause' );
-						clearInterval( timeInterval );
-						setTimeInterval( null );
+					<Hourglass size={ 24 } className="stroke-teal-600" />
+					<span className="text-2xl font-bold text-gray-900 tracking-tight">Timer</span>
 
-					} }
-				>
-					<Pause size={ 25 } color="white" fill="white" />
-				</button> }
+				</h1>
 
-				{ [ 'stop', 'pause' ].includes( status ) && <button
-					className="size-15 bg-blue-400 disabled:bg-blue-300 not-disabled:hover:bg-blue-500 rounded-full flex justify-center items-center cursor-pointer disabled:cursor-not-allowed"
-					disabled={ !timer.hours && !timer.minutes && !timer.seconds }
-					onClick={ () => {
+				<div className="w-9" />
 
-						setStartTime( Temporal.Now.plainDateTimeISO().add( timer ) );
-						setStatus( 'running' );
+			</div>
 
-					} }
-				>
-					<Play size={ 25 } color="white" fill="white" />
-				</button> }
+			<div className="bg-white shadow-xl rounded-3xl overflow-hidden border border-gray-100">
 
-			</section>
+				<div className="p-8 sm:p-12 bg-slate-900 flex justify-center items-center relative overflow-hidden">
 
-		</section>
+					<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-teal-500/20 blur-3xl rounded-full pointer-events-none" />
 
-		{ alert && <Alert show={ alert } title="Info" message="Time's Up" action={ () => setAlert( false ) } /> }
+					<div className="relative z-10 flex items-center justify-center gap-2 sm:gap-4 font-mono">
+
+						<div className="flex flex-col items-center gap-2">
+
+							<input
+								type="number"
+								min={ 0 }
+								max={ 99 }
+								className={ `w-20 sm:w-28 text-5xl sm:text-7xl font-light text-center rounded-2xl tabular-nums transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+									isEditable ?
+										'bg-slate-800/80 text-white border border-slate-600 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/50 outline-none py-2' 
+									:
+										'bg-transparent text-white border-transparent py-2'
+								}` }
+								value={ String( timer.hours ).padStart( 2, '0' ) }
+								onChange={ e => handleInput( e.target.value, 99, 'hours' ) }
+								readOnly={ !isEditable }
+							/>
+							<span className="text-slate-400 text-xs sm:text-sm font-bold tracking-widest uppercase">Hours</span>
+
+						</div>
+
+						<span className="text-4xl sm:text-6xl font-light text-slate-500 pb-6">:</span>
+
+						<div className="flex flex-col items-center gap-2">
+
+							<input
+								type="number"
+								min={ 0 }
+								max={ 59 }
+								className={ `w-20 sm:w-28 text-5xl sm:text-7xl font-light text-center rounded-2xl tabular-nums transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+									isEditable 
+										? 'bg-slate-800/80 text-white border border-slate-600 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/50 outline-none py-2' 
+										: 'bg-transparent text-white border-transparent py-2'
+								}` }
+								value={ String( timer.minutes ).padStart( 2, '0' ) }
+								onChange={ e => handleInput( e.target.value, 59, 'minutes' ) }
+								readOnly={ !isEditable }
+							/>
+							<span className="text-slate-400 text-xs sm:text-sm font-bold tracking-widest uppercase">Min</span>
+
+						</div>
+
+						<span className="text-4xl sm:text-6xl font-light text-slate-500 pb-6">:</span>
+
+						<div className="flex flex-col items-center gap-2">
+
+							<input
+								type="number"
+								min={ 0 }
+								max={ 59 }
+								className={ `w-20 sm:w-28 text-5xl sm:text-7xl font-light text-center rounded-2xl tabular-nums transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+									isEditable ?
+										'bg-slate-800/80 text-white border border-slate-600 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/50 outline-none py-2' 
+									:
+										'bg-transparent text-teal-400 border-transparent py-2 drop-shadow-md'
+								}` }
+								value={ String( timer.seconds ).padStart( 2, '0' ) }
+								onChange={ e => handleInput( e.target.value, 59, 'seconds' ) }
+								readOnly={ !isEditable }
+							/>
+							<span className="text-slate-400 text-xs sm:text-sm font-bold tracking-widest uppercase">Sec</span>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div className="p-8 flex justify-center items-center gap-6 sm:gap-8 bg-white">
+
+					{ [ 'running', 'pause' ].includes( status ) && <button
+						className="size-16 bg-gray-100 hover:bg-gray-200 rounded-full flex justify-center items-center shadow-sm transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-400"
+						onClick={ () => setStatus( 'stop' ) }
+						title="Cancel"
+					>
+						<Square size={ 24 } className="stroke-gray-600 fill-gray-600" />
+					</button> }
+
+					{ status === 'running' ? 
+						<button
+							className="size-20 bg-amber-500 hover:bg-amber-600 rounded-full flex justify-center items-center shadow-lg shadow-amber-500/30 transition-transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-amber-300"
+							onClick={ () => {
+
+								setStatus( 'pause' );
+								if ( timeInterval )
+									clearInterval( timeInterval );
+								setTimeInterval( null );
+
+							} }
+							title="Pause"
+						>
+							<Pause size={ 32 } className="stroke-white fill-white" />
+						</button>
+					:
+						<button
+							className="size-20 bg-teal-500 hover:bg-teal-600 disabled:bg-gray-300 disabled:hover:scale-100 disabled:shadow-none rounded-full flex justify-center items-center shadow-lg shadow-teal-500/30 transition-transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-teal-300 cursor-pointer disabled:cursor-not-allowed"
+							disabled={ !timer.hours && !timer.minutes && !timer.seconds }
+							onClick={ () => {
+								setStartTime( Temporal.Now.plainDateTimeISO().add( timer ) );
+								setStatus( 'running' );
+							} }
+							title={ status === 'pause' ? 'Resume' : 'Start' }
+						>
+							<Play size={ 32 } className="ml-1 stroke-white fill-white" />
+						</button>
+					}
+
+				</div>
+
+			</div>
+
+		</div>
+
+		{ alert && <Alert 
+			show={ alert } 
+			title="Time's Up!" 
+			message="Your timer has finished." 
+			action={ () => setAlert( false ) } 
+		/> }
 
 	</main>;
 
